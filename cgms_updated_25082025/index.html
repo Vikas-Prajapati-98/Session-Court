@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Court Search App</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <div id="app" class="w-full max-w-2xl p-4"></div>
+
+  <script>
+    // Translation dictionary
+    const translations = {
+      // Static UI text
+      "Select Language": {
+        en: "Select Language",
+        hi: "भाषा चुनें",
+        pa: "ਭਾਸ਼ਾ ਚੁਣੋ"
+      },
+      "Select Court Establishment": {
+        en: "Select Court Establishment",
+        hi: "न्यायालय प्रतिष्ठान चुनें",
+        pa: "ਕੋਰਟ ਸਥਾਪਨਾ ਚੁਣੋ"
+      },
+      "Type of Search": {
+        en: "Type of Search",
+        hi: "खोज का प्रकार",
+        pa: "ਖੋਜ ਦੀ ਕਿਸਮ"
+      },
+      "Case Search": {
+        en: "Case Search",
+        hi: "मामला खोज",
+        pa: "ਕੇਸ ਖੋਜ"
+      },
+      "Advocate": {
+        en: "Advocate",
+        hi: "वकील",
+        pa: "ਐਡਵੋਕੇਟ"
+      },
+      "Cause List": {
+        en: "Cause List",
+        hi: "कारण सूची",
+        pa: "ਕਾਰਨ ਸੂਚੀ"
+      },
+      "Lok Adalat Report": {
+        en: "Lok Adalat Report",
+        hi: "लोक अदालत रिपोर्ट",
+        pa: "ਲੋਕ ਅਦਾਲਤ ਰਿਪੋਰਟ"
+      },
+      "Search Caveat": {
+        en: "Search Caveat",
+        hi: "चेतावनी खोज",
+        pa: "ਕੇਵੀਅਤ ਖੋਜ"
+      },
+      "Panel Search": {
+        en: "Panel Search",
+        hi: "पैनल खोज",
+        pa: "ਪੈਨਲ ਖੋਜ"
+      },
+      "Back": {
+        en: "Back",
+        hi: "वापस",
+        pa: "ਵਾਪਸ"
+      },
+      "Close Browser": {
+        en: "Close Browser",
+        hi: "ब्राउज़र बंद करें",
+        pa: "ਬਰਾਊਜ਼ਰ ਬੰਦ ਕਰੋ"
+      },
+      "Search": {
+        en: "Search",
+        hi: "खोजें",
+        pa: "ਖੋਜੋ"
+      },
+      "Searching...": {
+        en: "Searching...",
+        hi: "खोज रहा है...",
+        pa: "ਖੋਜ ਰਿਹਾ ਹੈ..."
+      },
+      "Select search method": {
+        en: "Select search method",
+        hi: "खोज विधि चुनें",
+        pa: "ਖੋਜ ਵਿਧੀ ਚੁਣੋ"
+      },
+      "No results found.": {
+        en: "No results found.",
+        hi: "कोई परिणाम नहीं मिला।",
+        pa: "ਕੋਈ ਨਤੀਜੇ ਨਹੀਂ ਮਿਲੇ।"
+      },
+      "Failed to fetch results. Check input and try again.": {
+        en: "Failed to fetch results. Check input and try again.",
+        hi: "परिणाम प्राप्त करने में विफल। इनपुट जांचें और फिर से प्रयास करें।",
+        pa: "ਨਤੀਜੇ ਪ੍ਰਾਪਤ ਕਰਨ ਵਿੱਚ ਅਸਫਲ। ਇਨਪੁਟ ਦੀ ਜਾਂਚ ਕਰੋ ਅਤੇ ਮੁੜ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
+      },
+      "Please select a search method.": {
+        en: "Please select a search method.",
+        hi: "कृपया एक खोज विधि चुनें।",
+        pa: "ਕਿਰਪਾ ਕਰਕੇ ਇੱਕ ਖੋਜ ਵਿਧੀ ਚੁਣੋ।"
+      },
+      "Unable to close the browser automatically. Please close Chrome using Ctrl+W, Ctrl+F4, or the close button (X) at the top-right corner.": {
+        en: "Unable to close the browser automatically. Please close Chrome using Ctrl+W, Ctrl+F4, or the close button (X) at the top-right corner.",
+        hi: "ब्राउज़र को स्वचालित रूप से बंद करने में असमर्थ। कृपया Ctrl+W, Ctrl+F4, या ऊपरी-दाएँ कोने में बंद बटन (X) का उपयोग करके Chrome बंद करें।",
+        pa: "ਬਰਾਊਜ਼ਰ ਨੂੰ ਆਪਣੇ ਆਪ ਬੰਦ ਕਰਨ ਵਿੱਚ ਅਸਮਰੱਥ। ਕਿਰਪਾ ਕਰਕੇ Ctrl+W, Ctrl+F4, ਜਾਂ ਉੱਪਰ-ਸੱਜੇ ਕੋਨੇ ਵਿੱਚ ਬੰਦ ਬਟਨ (X) ਦੀ ਵਰਤੋਂ ਕਰਕੇ Chrome ਬੰਦ ਕਰੋ।"
+      },
+      // Search methods
+      "Search by CNR": {
+        en: "Search by CNR",
+        hi: "सीएनआर द्वारा खोज",
+        pa: "ਸੀਐਨਆਰ ਦੁਆਰਾ ਖੋਜ"
+      },
+      "Search by Filing Number": {
+        en: "Search by Filing Number",
+        hi: "फाइलिंग नंबर द्वारा खोज",
+        pa: "ਫਾਈਲਿੰਗ ਨੰਬਰ ਦੁਆਰਾ ਖੋਜ"
+      },
+      "Search by Registration": {
+        en: "Search by Registration",
+        hi: "पंजीकरण द्वारा खोज",
+        pa: "ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਦੁਆਰਾ ਖੋਜ"
+      },
+      "Search by FIR": {
+        en: "Search by FIR",
+        hi: "एफआईआर द्वारा खोज",
+        pa: "ਐਫਆਈਆਰ ਦੁਆਰਾ ਖੋਜ"
+      },
+      "Search by Party": {
+        en: "Search by Party",
+        hi: "पक्ष द्वारा खोज",
+        pa: "ਪਾਰਟੀ ਦੁਆਰਾ ਖੋਜ"
+      },
+      "Search by Subordinate": {
+        en: "Search by Subordinate",
+        hi: "अधीनस्थ द्वारा खोज",
+        pa: "ਅਧੀਨ ਦੁਆਰਾ ਖੋਜ"
+      },
+      "Advocate Search": {
+        en: "Advocate Search",
+        hi: "वकील खोज",
+        pa: "ਐਡਵੋਕੇਟ ਖੋਜ"
+      },
+      "Cause List Search": {
+        en: "Cause List Search",
+        hi: "कारण सूची खोज",
+        pa: "ਕਾਰਨ ਸੂਚੀ ਖੋਜ"
+      },
+      "Lok Adalat Search": {
+        en: "Lok Adalat Search",
+        hi: "लोक अदालत खोज",
+        pa: "ਲੋਕ ਅਦਾਲਤ ਖੋਜ"
+      },
+      "Caveat Search": {
+        en: "Caveat Search",
+        hi: "चेतावनी खोज",
+        pa: "ਕੇਵੀਅਤ ਖੋਜ"
+      },
+      "Panel Search": {
+        en: "Panel Search",
+        hi: "पैनल खोज",
+        pa: "ਪੈਨਲ ਖੋਜ"
+      },
+      // Field labels (used in placeholders and errors)
+      "cnr_number": {
+        en: "CNR Number",
+        hi: "सीएनआर नंबर",
+        pa: "ਸੀਐਨਆਰ ਨੰਬਰ"
+      },
+      "filing_number": {
+        en: "Filing Number",
+        hi: "फाइलिंग नंबर",
+        pa: "ਫਾਈਲਿੰਗ ਨੰਬਰ"
+      },
+      "year": {
+        en: "Year",
+        hi: "वर्ष",
+        pa: "ਸਾਲ"
+      },
+      "case_type": {
+        en: "Case Type",
+        hi: "मामले का प्रकार",
+        pa: "ਕੇਸ ਦੀ ਕਿਸਮ"
+      },
+      "registration_number": {
+        en: "Registration Number",
+        hi: "पंजीकरण नंबर",
+        pa: "ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਨੰਬਰ"
+      },
+      "police_station": {
+        en: "Police Station",
+        hi: "पुलिस स्टेशन",
+        pa: "ਪੁਲਿਸ ਸਟੇਸ਼ਨ"
+      },
+      "fir_number": {
+        en: "FIR Number",
+        hi: "एफआईआर नंबर",
+        pa: "ਐਫਆਈਆਰ ਨੰਬਰ"
+      },
+      "status": {
+        en: "Status",
+        hi: "स्थिति",
+        pa: "ਸਥਿਤੀ"
+      },
+      "petitioner_respondent": {
+        en: "Petitioner/Respondent",
+        hi: "याचिकाकर्ता/प्रतिवादी",
+        pa: "ਪਟੀਸ਼ਨਰ/ਜਵਾਬਦੇਹ"
+      },
+      "subordinate_court_name": {
+        en: "Subordinate Court Name",
+        hi: "अधीनस्थ न्यायालय का नाम",
+        pa: "ਅਧੀਨ ਕੋਰਟ ਦਾ ਨਾਮ"
+      },
+      "judge_name": {
+        en: "Judge Name",
+        hi: "न्यायाधीश का नाम",
+        pa: "ਜੱਜ ਦਾ ਨਾਮ"
+      },
+      "advocate_name": {
+        en: "Advocate Name",
+        hi: "वकील का नाम",
+        pa: "ਐਡਵੋਕੇਟ ਦਾ ਨਾਮ"
+      },
+      "court_name": {
+        en: "Court Name",
+        hi: "न्यायालय का नाम",
+        pa: "ਕੋਰਟ ਦਾ ਨਾਮ"
+      },
+      "court_type": {
+        en: "Court Type",
+        hi: "न्यायालय का प्रकार",
+        pa: "ਕੋਰਟ ਦੀ ਕਿਸਮ"
+      },
+      "state": {
+        en: "State",
+        hi: "राज्य",
+        pa: "ਰਾਜ"
+      },
+      "district": {
+        en: "District",
+        hi: "जिला",
+        pa: "ਜ਼ਿਲ੍ਹਾ"
+      },
+      "lokadalat": {
+        en: "Lok Adalat",
+        hi: "लोक अदालत",
+        pa: "ਲੋਕ ਅਦਾਲਤ"
+      },
+      "panel": {
+        en: "Panel",
+        hi: "पैनल",
+        pa: "ਪੈਨਲ"
+      },
+      "caveat_type": {
+        en: "Caveat Type",
+        hi: "चेतावनी प्रकार",
+        pa: "ਕੇਵੀਅਤ ਦੀ ਕਿਸਮ"
+      },
+      "caveator_name": {
+        en: "Caveator Name",
+        hi: "चेतावनी देने वाला नाम",
+        pa: "ਕੇਵੀਅਤ ਦੇਣ ਵਾਲੇ ਦਾ ਨਾਮ"
+      },
+      "caveatee_name": {
+        en: "Caveatee Name",
+        hi: "चेतावनी प्राप्तकर्ता नाम",
+        pa: "ਕੇਵੀਅਤ ਪ੍ਰਾਪਤਕਰਤਾ ਦਾ ਨਾਮ"
+      },
+      "fir_type": {
+        en: "FIR Type",
+        hi: "एफआईआर प्रकार",
+        pa: "ਐਫਆਈਆਰ ਦੀ ਕਿਸਮ"
+      },
+      // Error template
+      "is required.": {
+        en: "is required.",
+        hi: "आवश्यक है।",
+        pa: "ਦੀ ਲੋੜ ਹੈ।"
+      }
+    };
+
+    // Configuration
+    const API_BASE_URL = "http://127.0.0.1:8000";
+    const courts = [
+      {
+        name: {
+          en: "District & Session Court Sangrur",
+          hi: "जिला और सत्र न्यायालय संगरूर",
+          pa: "ਜ਼ਿਲ੍ਹਾ ਅਤੇ ਸੈਸ਼ਨ ਕੋਰਟ ਸੰਗਰੂਰ"
+        },
+        state: "Punjab",
+        district: "Sangrur",
+        type: "Sessions Court"
+      },
+      {
+        name: {
+          en: "Criminal Court Sangrur",
+          hi: "आपराधिक न्यायालय संगरूर",
+          pa: "ਕ੍ਰਿਮੀਨਲ ਕੋਰਟ ਸੰਗਰੂਰ"
+        },
+        state: "Punjab",
+        district: "Sangrur",
+        type: "Criminal Court"
+      },
+      {
+        name: {
+          en: "Civil Court Sangrur",
+          hi: "सिविल न्यायालय संगरूर",
+          pa: "ਸਿਵਲ ਕੋਰਟ ਸੰਗਰੂਰ"
+        },
+        state: "Punjab",
+        district: "Sangrur",
+        type: "Civil Court"
+      }
+    ];
+    const searchTypes = {
+      "Case Search": [
+        { name: "Search by CNR", api: "/search/cnr", fields: ["cnr_number"] },
+        { name: "Search by Filing Number", api: "/search/filing", fields: ["filing_number", "year"] },
+        { name: "Search by Registration", api: "/search/registration", fields: ["case_type", "registration_number", "year"] },
+        { name: "Search by FIR", api: "/search/fir", fields: ["state", "district", "police_station", "fir_number", "year", "status"] },
+        { name: "Search by Party", api: "/search/party", fields: ["petitioner_respondent", "status"] },
+        { name: "Search by Subordinate", api: "/search/subordinate", fields: ["state", "district", "subordinate_court_name", "judge_name"] },
+      ],
+      "Advocate": [{ name: "Advocate Search", api: "/search/advocate", fields: ["advocate_name", "status"] }],
+      "Cause List": [{ name: "Cause List Search", api: "/search/cause_list", fields: ["court_name", "court_type"] }],
+      "Lok Adalat Report": [{ name: "Lok Adalat Search", api: "/search/lokadalat", fields: ["status", "lokadalat", "panel"] }],
+      "Search Caveat": [{ name: "Caveat Search", api: "/search/caveat", fields: ["caveat_type", "caveator_name", "caveatee_name"] }],
+      "Panel Search": [{ name: "Panel Search", api: "/search/pre_panel", fields: ["police_station", "fir_type", "fir_number", "year"] }],
+    };
+
+    // State
+    let state = {
+      step: "language",
+      language: "en", // Default to English
+      court: null,
+      searchType: null,
+      searchMethod: null,
+      history: [], // Track navigation for back button
+    };
+
+    // Translation function
+    function translate(key, fallback = key) {
+      const lang = state.language || "en";
+      const translation = translations[key] && translations[key][lang];
+      return translation || fallback;
+    }
+
+    // Function to translate court names
+    function translateCourtName(court) {
+      const lang = state.language || "en";
+      return court.name[lang] || court.name.en;
+    }
+
+    // Render functions
+    function render() {
+      const app = document.getElementById("app");
+      app.innerHTML = "";
+      console.log("Current step:", state.step);
+
+      if (state.step === "language") {
+        renderLanguageSelection();
+      } else if (state.step === "court") {
+        renderCourtSelection();
+      } else if (state.step === "searchType") {
+        renderSearchTypeSelection();
+      } else if (state.step === "search") {
+        renderSearchForm();
+      }
+    }
+
+    function renderCloseButton() {
+      return `
+        <button class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 mt-4" onclick="closeBrowser()">${translate("Close Browser")}</button>
+      `;
+    }
+
+    function renderBackButton() {
+      if (state.history.length > 0) {
+        return `
+          <button class="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600 mb-4" onclick="goBack()">${translate("Back")}</button>
+        `;
+      }
+      return "";
+    }
+
+    function renderLanguageSelection() {
+      const app = document.getElementById("app");
+      app.innerHTML = `
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <h1 class="text-2xl font-bold mb-4 text-center">${translate("Select Language")}</h1>
+          <div class="flex flex-col gap-4">
+            ${["Punjabi", "Hindi", "English"].map(lang => `
+              <button class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600" onclick="selectLanguage('${lang.toLowerCase()}')">${lang}</button>
+            `).join("")}
+          </div>
+          ${renderCloseButton()}
+        </div>
+      `;
+    }
+
+    function renderCourtSelection() {
+      const app = document.getElementById("app");
+      app.innerHTML = `
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          ${renderBackButton()}
+          <h1 class="text-2xl font-bold mb-4 text-center">${translate("Select Court Establishment")}</h1>
+          <div class="flex flex-col gap-4">
+            ${courts.map((court, index) => `
+              <button class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600" onclick="selectCourt(${index})">${translateCourtName(court)}</button>
+            `).join("")}
+          </div>
+          ${renderCloseButton()}
+        </div>
+      `;
+    }
+
+    function renderSearchTypeSelection() {
+      const app = document.getElementById("app");
+      app.innerHTML = `
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          ${renderBackButton()}
+          <h1 class="text-2xl font-bold mb-4 text-center">${translate("Type of Search")}</h1>
+          <div class="flex flex-col gap-4">
+            ${Object.keys(searchTypes).map(type => `
+              <button class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600" onclick="selectSearchType('${type}')">${translate(type)}</button>
+            `).join("")}
+          </div>
+          ${renderCloseButton()}
+        </div>
+      `;
+    }
+
+    function renderSearchForm() {
+      const app = document.getElementById("app");
+      const methods = searchTypes[state.searchType];
+      app.innerHTML = `
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          ${renderBackButton()}
+          <h1 class="text-2xl font-bold mb-4 text-center">${translate(state.searchType)}</h1>
+          ${state.searchType === "Case Search" ? `
+            <div class="grid grid-cols-2 gap-4 mb-4">
+              ${methods.map(method => `
+                <button class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600" onclick="selectSearchMethod('${method.name}')">${translate(method.name)}</button>
+              `).join("")}
+            </div>
+          ` : `
+            <select id="searchMethod" class="w-full p-2 mb-4 border rounded" onchange="selectSearchMethod(this.value)">
+              <option value="" disabled selected>${translate("Select search method")}</option>
+              ${methods.map(m => `<option value="${m.name}" ${state.searchMethod === m.name ? "selected" : ""}>${translate(m.name)}</option>`).join("")}
+            </select>
+          `}
+          <div id="formFields"></div>
+          <div id="error" class="text-red-500 mt-4 hidden"></div>
+          <div id="results" class="mt-6"></div>
+          ${renderCloseButton()}
+        </div>
+      `;
+      if (state.searchMethod) {
+        updateFormFields();
+      }
+    }
+
+    function updateFormFields() {
+      const method = searchTypes[state.searchType].find(m => m.name === state.searchMethod);
+      const formFields = document.getElementById("formFields");
+      formFields.innerHTML = `
+        ${method.fields.map(field => `
+          <input type="text" id="${field}" class="p-2 border rounded w-full mb-2" placeholder="${translate(field).toUpperCase()}" ${state.court && ["court_name", "court_type", "state", "district"].includes(field) ? "disabled" : ""} value="${state.court && field === "court_name" ? state.court.name.en : state.court && field === "court_type" ? state.court.type : state.court && field === "state" ? state.court.state : state.court && field === "district" ? state.court.district : ""}">
+        `).join("")}
+        <button class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 mt-4" onclick="performSearch()">${translate("Search")}</button>
+      `;
+    }
+
+    // Event handlers
+    function selectLanguage(lang) {
+      state.language = lang === "punjabi" ? "pa" : lang === "hindi" ? "hi" : "en";
+      state.step = "court";
+      state.history.push("language");
+      console.log("Language selected:", state.language);
+      render();
+    }
+
+    function selectCourt(index) {
+      state.court = courts[index];
+      state.step = "searchType";
+      state.history.push("court");
+      console.log("Court selected:", state.court);
+      render();
+    }
+
+    function selectSearchType(type) {
+      state.searchType = type;
+      state.searchMethod = null;
+      state.step = "search";
+      state.history.push("searchType");
+      console.log("Search type selected:", type);
+      render();
+    }
+
+    function selectSearchMethod(methodName) {
+      state.searchMethod = methodName;
+      console.log("Search method selected:", methodName);
+      updateFormFields();
+    }
+
+    function goBack() {
+      if (state.history.length > 0) {
+        const previousStep = state.history.pop();
+        state.step = previousStep;
+        if (previousStep === "searchType") {
+          state.searchMethod = null;
+        } else if (previousStep === "court") {
+          state.searchType = null;
+          state.searchMethod = null;
+        } else if (previousStep === "language") {
+          state.court = null;
+          state.searchType = null;
+          state.searchMethod = null;
+        }
+        console.log("Going back to:", previousStep);
+        render();
+      }
+    }
+
+    async function performSearch() {
+      const method = searchTypes[state.searchType].find(m => m.name === state.searchMethod);
+      if (!method) {
+        console.error("No method selected");
+        document.getElementById("error").textContent = translate("Please select a search method.");
+        document.getElementById("error").classList.remove("hidden");
+        return;
+      }
+
+      // Create query parameters
+      const params = new URLSearchParams();
+      method.fields.forEach(field => {
+        if (!["court_name", "court_type", "state", "district"].includes(field)) {
+          const input = document.getElementById(field);
+          if (input && input.value) {
+            params.append(field, input.value.trim());
+          }
+        }
+      });
+
+      // Add court-specific fields
+      if (state.court) {
+        if (method.fields.includes("court_name")) params.append("court_name", state.court.name.en);
+        if (method.fields.includes("court_type")) params.append("court_type", state.court.type);
+        if (method.fields.includes("state")) params.append("state", state.court.state);
+        if (method.fields.includes("district")) params.append("district", state.court.district);
+      }
+
+      // Validate required fields
+      for (const field of method.fields) {
+        if (!params.get(field) || params.get(field) === "") {
+          console.warn(`Missing or empty required field: ${field}`);
+          document.getElementById("error").textContent = `${translate(field).toUpperCase()} ${translate("is required.")}`;
+          document.getElementById("error").classList.remove("hidden");
+          return;
+        }
+      }
+
+      const errorDiv = document.getElementById("error");
+      const resultsDiv = document.getElementById("results");
+      errorDiv.classList.add("hidden");
+      resultsDiv.innerHTML = "";
+      const searchButton = document.querySelector("button.bg-green-500");
+      searchButton.textContent = translate("Searching...");
+      searchButton.disabled = true;
+
+      try {
+        const queryString = params.toString();
+        console.log("Sending API request:", { api: method.api, query: queryString });
+        const response = await fetch(`${API_BASE_URL}${method.api}?${queryString}`, {
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+          },
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("API error details:", JSON.stringify(errorData, null, 2));
+          throw new Error(`HTTP ${response.status}: ${JSON.stringify(errorData)}`);
+        }
+        const results = await response.json();
+        console.log("API response:", results);
+        renderResults(results);
+      } catch (err) {
+        console.error("API error:", err.message);
+        errorDiv.textContent = translate("Failed to fetch results. Check input and try again.");
+        errorDiv.classList.remove("hidden");
+      } finally {
+        searchButton.textContent = translate("Search");
+        searchButton.disabled = false;
+      }
+    }
+
+    function closeBrowser() {
+      console.log("Attempting to close browser...");
+      try {
+        // Attempt to close the current window
+        window.close();
+        
+        // Check if window is still open after a short delay
+        setTimeout(() => {
+          if (!window.closed) {
+            console.warn("Failed to close the browser tab. It may not have been opened by a script.");
+            alert(translate("Unable to close the browser automatically. Please close Chrome using Ctrl+W, Ctrl+F4, or the close button (X) at the top-right corner."));
+          } else {
+            console.log("Browser tab closed successfully.");
+          }
+        }, 500);
+      } catch (err) {
+        console.error("Error attempting to close browser:", err);
+        alert(translate("Unable to close the browser automatically. Please close Chrome using Ctrl+W, Ctrl+F4, or the close button (X) at the top-right corner."));
+      }
+    }
+
+    function renderResults(results) {
+      const resultsDiv = document.getElementById("results");
+      if (!results || results.length === 0) {
+        resultsDiv.innerHTML = `<p>${translate("No results found.")}</p>`;
+        return;
+      }
+
+      // Create a wrapper div for the table with horizontal scrolling
+      const tableWrapper = document.createElement("div");
+      tableWrapper.className = "overflow-x-auto";
+
+      const table = document.createElement("table");
+      table.className = "table-auto border-collapse min-w-full"; // Use table-auto instead of w-full
+      const thead = document.createElement("thead");
+      thead.className = "bg-gray-200";
+      const tbody = document.createElement("tbody");
+
+      // Header
+      const headerRow = document.createElement("tr");
+      const keys = Object.keys(results[0]).slice(0, 5);
+      keys.forEach(key => {
+        const th = document.createElement("th");
+        th.className = "p-2 border text-left whitespace-normal"; // Allow wrapping in headers
+        th.textContent = translate(key).toUpperCase();
+        headerRow.appendChild(th);
+      });
+      thead.appendChild(headerRow);
+
+      // Rows
+      results.forEach(result => {
+        const row = document.createElement("tr");
+        row.className = "border-t";
+        keys.forEach(key => {
+          const td = document.createElement("td");
+          td.className = "p-2 border whitespace-normal"; // Allow wrapping in cells
+          td.textContent = result[key] || "-";
+          row.appendChild(td);
+        });
+        tbody.appendChild(row);
+      });
+
+      table.appendChild(thead);
+      table.appendChild(tbody);
+      tableWrapper.appendChild(table);
+      resultsDiv.appendChild(tableWrapper);
+    }
+
+    // Initialize
+    render();
+  </script>
+</body>
+</html>
+
